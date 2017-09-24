@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Editors">
+        <folder name="AnnotationTypes">
+            <file name="com-junichi11-netbeans-modules-textlint-annotation.xml" url="nbresloc:/com/junichi11/netbeans/modules/textlint/textlint-annotation.xml"/>
+            <file name="com-junichi11-netbeans-modules-textlint-fixable-annotation.xml" url="nbresloc:/com/junichi11/netbeans/modules/textlint/textlint-fixable-annotation.xml"/>
+        </folder>
+    </folder>
+    <folder name="TaskList">
+        <folder name="Groups">
+            <file name="textlint.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.spi.tasklist.Task.createGroup"/>
+                <attr name="localizingBundle" stringvalue="com.junichi11.netbeans.modules.textlint.Bundle"/>
+                <attr name="groupName" stringvalue="nb-tasklist-textlint"/>
+                <attr name="diplayNameKey" stringvalue="LBL_textlint_group"/>
+                <attr name="descriptionKey" stringvalue="Hint_textlint_group"/>
+                <attr name="iconKey" stringvalue="Icon_textlint"/>
+                <attr name="position" intvalue="2000"/>
+            </file>
+            <file name="textlint-fixable.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.spi.tasklist.Task.createGroup"/>
+                <attr name="localizingBundle" stringvalue="com.junichi11.netbeans.modules.textlint.Bundle"/>
+                <attr name="groupName" stringvalue="nb-tasklist-textlint-fixable"/>
+                <attr name="diplayNameKey" stringvalue="LBL_textlint_fixable_group"/>
+                <attr name="descriptionKey" stringvalue="Hint_textlint_fixable_group"/>
+                <attr name="iconKey" stringvalue="Icon_textlint_fixable"/>
+                <attr name="position" intvalue="2100"/>
+            </file>
+        </folder>
+    </folder>
+</filesystem>

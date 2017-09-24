@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.junichi11</groupId>
+    <artifactId>netbeans-textlint-plugin</artifactId>
+    <version>0.1.0</version>
+    <packaging>nbm</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <version>3.13</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <codeNameBase>com.junichi11.netbeans.modules.textlint</codeNameBase>
+                    <verifyRuntime>warn</verifyRuntime>
+                    <licenseName>Apache 2.0 license</licenseName>
+                    <licenseFile>LICENSE</licenseFile>
+                    <author>junichi11(Junichi Yamamoto)</author>
+                    <homePageUrl>https://github.com/junichi11/netbeans-textlint-plugin</homePageUrl>
+                    <keystore>nbproject/private/keystore</keystore>
+                    <keystorealias>myself</keystorealias>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.15</version>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <repository>
+            <id>netbeans</id>
+            <name>Repository hosting NetBeans modules</name>
+            <url>http://bits.netbeans.org/nexus/content/groups/netbeans</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>unknown-jars-temp-repo</id>
+            <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
+            <url>file:${project.basedir}/lib</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <version>${netbeans.release.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-spi-tasklist</artifactId>
+            <version>${netbeans.release.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-filesystems</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-extexecution</artifactId>
+            <version>${netbeans.release.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-extexecution-base</artifactId>
+            <version>${netbeans.release.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-windows</artifactId>
+            <version>${netbeans.release.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-io</artifactId>
+            <version>${netbeans.release.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-lib2</artifactId>
+            <version>RELEASE82</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-text</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-csl-api</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-lib</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-loaders</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-nodes</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-ui</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-options-api</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-awt</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-filesystems-nb</artifactId>
+            <version>RELEASE82</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-nbjunit</artifactId>
+            <version>RELEASE82</version>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <netbeans.release.version>RELEASE82</netbeans.release.version>
+    </properties>
+    <name>textlint Support</name>
+    <description>This plugin provides support for textlint.
+
+&lt;h3&gt;What&amp;rsquo;s the textlint?&lt;/h3&gt;
+&lt;p&gt;See &lt;a href="https://github.com/textlint/textlint"&gt;https://github.com/textlint/textlint&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3&gt;Usage&lt;/h3&gt;
+&lt;h4&gt;Install textlint and rules&lt;/h4&gt;
+&lt;p&gt;Of course, it assumes that nodejs and npm are installed.&lt;/p&gt;
+&lt;p&gt;e.g.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ mkdir txtlint
+$ cd txtlint
+$ npm init
+$ npm install textlint --save-dev
+$ npm install textlint-rule-max-ten textlint-rule-spellcheck-tech-word textlint-rule-no-mix-dearu-desumasu --save-dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;Create .textlintrc&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;$ touch .textlintrc
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code class="json"&gt;{
+  &amp;quot;rules&amp;quot;: {
+    &amp;quot;max-ten&amp;quot;: {
+      &amp;quot;max&amp;quot;: 3
+    },
+    &amp;quot;spellcheck-tech-word&amp;quot;: true,
+    &amp;quot;no-mix-dearu-desumasu&amp;quot;: true
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4&gt;Set textlint and .textlintrc paths&lt;/h4&gt;
+&lt;p&gt;Set paths to the Options (see below).&lt;/p&gt;
+&lt;p&gt;e.g.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;textlint Path: /path/to/txtlint/node_modules/.bin/textlint (textlint.cmd in Windows)&lt;/li&gt;
+  &lt;li&gt;.textlintrc Path: /path/to/textlint/.textlintrc&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;Open Action Items window&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;Click Window &gt; Action Items.&lt;/li&gt;
+  &lt;li&gt;Click &amp;ldquo;Show action items for currently edited file only&amp;rdquo; icon.&lt;/li&gt;
+  &lt;li&gt;Open your markdown or text file.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Options&lt;/h3&gt;
+&lt;p&gt;Tools &gt; Options &gt; Editor &gt; textlint&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;textlint Path: Absolute path to textlint&lt;/li&gt;
+  &lt;li&gt;.textlintrc Path: Absolute path to .textlintrc&lt;/li&gt;
+  &lt;li&gt;Options : You can set options for the textlint command&lt;/li&gt;
+  &lt;li&gt;Enable in HTML files: To use the html plugin, you can check this&lt;/li&gt;
+  &lt;li&gt;Refresh on Save: To scan the document on save, you can check this (Checked by default)&lt;/li&gt;
+  &lt;li&gt;Show Annotations: To show annotations in the glyph gutter, you can check this (Checked by default)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Actions&lt;/h3&gt;
+&lt;h4&gt;Fix&lt;/h4&gt;
+&lt;p&gt;You have to save your file before you run this action.&lt;br/&gt;
+If there is a fixable rule&amp;rsquo;s error, you can fix it. Right-click an item &gt; Click &lt;code&gt;Fix&lt;/code&gt;.&lt;br/&gt;
+To refresh items, your document is saved once.&lt;/p&gt;
+
+&lt;h4&gt;Fix All&lt;/h4&gt;
+&lt;p&gt;You have to save your file before you run this action.&lt;br/&gt;
+If there are fixable rule&amp;rsquo;s errors, you can fix them. Right-click an item &gt; Click &lt;code&gt;Fix All&lt;/code&gt;.&lt;br/&gt;
+This action runs &lt;code&gt;textlint --fix&lt;/code&gt;command.&lt;/p&gt;
+
+&lt;h3&gt;NOTE&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;The plugin scans only current file.&lt;/li&gt;
+  &lt;li&gt;The plugin does not refresh if your file has modifications. Please save it.&lt;/li&gt;
+  &lt;li&gt;Use &lt;code&gt;UTF-8&lt;/code&gt; as file encoding and &lt;code&gt;LF&lt;/code&gt; as line endings.&lt;/li&gt;
+  &lt;li&gt;This plugin may not work properly in Windows. (Please try to check above.)&lt;/li&gt;
+  &lt;li&gt;If you cannot get expected results, just try to run the &lt;code&gt;textlint&lt;/code&gt; commands once in your CLI.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+</project>

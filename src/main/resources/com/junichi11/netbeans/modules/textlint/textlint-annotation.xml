@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE type PUBLIC
+    "-//NetBeans//DTD annotation type 1.0//EN"
+    "http://www.netbeans.org/dtds/annotation-type-1_0.dtd">
+<type name="com-junichi11-netbeans-modules-textlint-annotation"
+      localizing_bundle="com.junichi11.netbeans.modules.textlint.Bundle"
+      visible="true"
+      glyph="nbresloc:/com/junichi11/netbeans/modules/textlint/textlint_icon_16.png"
+      highlight="#F6D4D8"
+      type="line"
+/>

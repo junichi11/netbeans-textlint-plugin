@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Layer: com/junichi11/netbeans/modules/textlint/layer.xml
+OpenIDE-Module-Localizing-Bundle: com/junichi11/netbeans/modules/textlint/Bundle.properties
+

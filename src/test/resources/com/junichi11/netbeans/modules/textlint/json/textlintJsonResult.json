@@ -1,0 +1,51 @@
+[
+    {
+        "messages": [
+            {
+                "type": "lint",
+                "ruleId": "no-mix-dearu-desumasu",
+                "message": "本文: \"である\"調 と \"ですます\"調 が混在\n=> \"である。\" がである調\nTotal:\nである  : 2\nですます: 3\n",
+                "index": 127,
+                "line": 9,
+                "column": 4,
+                "severity": 2
+            },
+            {
+                "type": "lint",
+                "ruleId": "spellcheck-tech-word",
+                "message": "JAVASCRIPT => JavaScript",
+                "index": 133,
+                "line": 11,
+                "column": 1,
+                "severity": 2,
+                "fix": {
+                    "range": [133, 143],
+                    "text": "JavaScript"
+                }
+            },
+            {
+                "type": "lint",
+                "ruleId": "no-mix-dearu-desumasu",
+                "message": "本文: \"である\"調 と \"ですます\"調 が混在\n=> \"である。\" がである調\nTotal:\nである  : 2\nですます: 3\n",
+                "index": 144,
+                "line": 11,
+                "column": 12,
+                "severity": 2
+            },
+            {
+                "type": "lint",
+                "ruleId": "spellcheck-tech-word",
+                "message": "javascript => JavaScript",
+                "index": 158,
+                "line": 15,
+                "column": 1,
+                "severity": 2,
+                "fix": {
+                    "range": [158, 168],
+                    "text": "JavaScript"
+                }
+            }
+        ],
+        "filePath": "/path/to/MyProject/README.md"
+    }
+]
