@@ -10,6 +10,10 @@ This plugin provides support for textlint.
 
 See https://github.com/textlint/textlint
 
+### Downloads
+
+- https://github.com/junichi11/netbeans-textlint-plugin/releases
+
 ### Usage
 
 #### Install textlint and rules
