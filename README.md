@@ -44,6 +44,8 @@ $ touch .textlintrc
 }
 ```
 
+You can also set parameters to Options (see below).
+
 #### Set textlint and .textlintrc paths
 
 Set paths to the Options (see below).

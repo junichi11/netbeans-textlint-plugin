@@ -220,6 +220,7 @@ $ npm install textlint-rule-max-ten textlint-rule-spellcheck-tech-word textlint-
   }
 }
 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can also set parameters to Options (see below).&lt;/p&gt;
 
 &lt;h4&gt;Set textlint and .textlintrc paths&lt;/h4&gt;
 &lt;p&gt;Set paths to the Options (see below).&lt;/p&gt;
