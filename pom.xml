@@ -19,8 +19,6 @@
                     <licenseFile>LICENSE</licenseFile>
                     <author>junichi11(Junichi Yamamoto)</author>
                     <homePageUrl>https://github.com/junichi11/netbeans-textlint-plugin</homePageUrl>
-                    <keystore>nbproject/private/keystore</keystore>
-                    <keystorealias>myself</keystorealias>
                 </configuration>
             </plugin>
             <plugin>
