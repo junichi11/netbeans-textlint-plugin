@@ -1,6 +1,6 @@
 ## NetBeans textlint Plugin
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.org/junichi11/netbeans-textlint-plugin.svg?branch=master)](https://travis-ci.org/junichi11/netbeans-textlint-plugin)
 
 This plugin provides support for textlint.
 
