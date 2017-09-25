@@ -316,7 +316,7 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
                     for (TextlintJsonResult result : results) {
                         result.getMessages().forEach((message) -> {
                             Line line = getCurrentLine(lineSet, message.getLine());
-                            OpenAction defaultAction = line != null ? new OpenAction(message.getLine(), dataObject) : null;
+                            OpenAction defaultAction = line != null ? new OpenAction(line) : null;
                             Action[] popupActions = createPopupActions(dataObject, fileObject, message.getFix());
                             String description = String.format(MESSAGE_FORMAT,
                                     message.getRuleId(),

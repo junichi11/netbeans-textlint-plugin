@@ -16,12 +16,7 @@
 package com.junichi11.netbeans.modules.textlint.ui.actions;
 
 import java.awt.event.ActionEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
-import org.netbeans.api.annotations.common.NonNull;
-import org.openide.cookies.LineCookie;
-import org.openide.loaders.DataObject;
 import org.openide.text.Line;
 import org.openide.util.NbBundle;
 
@@ -32,39 +27,20 @@ import org.openide.util.NbBundle;
  */
 public class OpenAction extends AbstractAction {
 
-    private static final long serialVersionUID = 8371723464579911704L;
+    private static final long serialVersionUID = 5960169273364164482L;
 
-    private final int line;
-    private final DataObject dataObject;
-    private static final Logger LOGGER = Logger.getLogger(OpenAction.class.getName());
+    private final Line line;
 
     @NbBundle.Messages("OpenAction.displayName=Go to Error Line")
-    public OpenAction(int line, @NonNull DataObject dataObject) {
+    public OpenAction(Line line) {
         super(Bundle.OpenAction_displayName());
         this.line = line;
-        this.dataObject = dataObject;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (line < 1) {
-            return;
-        }
-        LineCookie lineCookie = dataObject.getLookup().lookup(LineCookie.class);
-        if (lineCookie == null) {
-            return;
-        }
-        Line.Set lineSet = lineCookie.getLineSet();
-        try {
-            Line currentLine = lineSet.getOriginal(line - 1);
-            if (currentLine == null) {
-                currentLine = lineSet.getOriginal(0);
-            }
-            if (currentLine != null) {
-                currentLine.show(Line.ShowOpenType.NONE, Line.ShowVisibilityType.FOCUS);
-            }
-        } catch (IndexOutOfBoundsException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
+        if (line != null) {
+            line.show(Line.ShowOpenType.NONE, Line.ShowVisibilityType.FOCUS);
         }
     }
 
