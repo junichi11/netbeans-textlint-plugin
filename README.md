@@ -13,6 +13,7 @@ See https://github.com/textlint/textlint
 ### Downloads
 
 - https://github.com/junichi11/netbeans-textlint-plugin/releases
+- http://plugins.netbeans.org/plugin/73031/textlint-support
 
 ### Usage
 
