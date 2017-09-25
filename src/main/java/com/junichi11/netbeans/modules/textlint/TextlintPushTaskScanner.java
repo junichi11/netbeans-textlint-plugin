@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Action;
@@ -67,6 +68,7 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
     private TaskScanningScope scope;
     private Callback callback;
+    private boolean useStdin = true;
 
     private static final String TEXTLINT_GROUP_NAME = "nb-tasklist-textlint"; // NOI18N
     private static final String TEXTLINT_FIXABLE_GROUP_NAME = "nb-tasklist-textlint-fixable"; // NOI18N
@@ -90,6 +92,16 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
     public static void refresh() {
         if (INSTANCE != null) {
+            INSTANCE.setScope(INSTANCE.scope, INSTANCE.callback);
+        }
+    }
+
+    /**
+     * Scan using the file path.
+     */
+    public static void refreshFile() {
+        if (INSTANCE != null) {
+            INSTANCE.useStdin = false;
             INSTANCE.setScope(INSTANCE.scope, INSTANCE.callback);
         }
     }
@@ -170,7 +182,8 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
     private TextlintJsonReader getTextLintJsonReader(Document document, File file) throws InvalidTextlintExecutableException, BadLocationException {
         long startTime = System.currentTimeMillis();
         TextlintJsonReader reader;
-        if (document == null) {
+        if (document == null || !useStdin) {
+            useStdin = true;
             reader = Textlint.getDefault().textlint(file.getAbsolutePath());
         } else {
             String text = document.getText(0, document.getLength());

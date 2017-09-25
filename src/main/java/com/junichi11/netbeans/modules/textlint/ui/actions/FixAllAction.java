@@ -64,7 +64,7 @@ public class FixAllAction extends AbstractAction {
             if (lastFocusedComponent != null) {
                 lastFocusedComponent.requestFocusInWindow();
             }
-            TextlintPushTaskScanner.refresh();
+            TextlintPushTaskScanner.refreshFile();
         } catch (InvalidTextlintExecutableException ex) {
             LOGGER.log(Level.WARNING, ex.getMessage());
         }
