@@ -17,6 +17,12 @@ package com.junichi11.netbeans.modules.textlint.command;
 
 import com.junichi11.netbeans.modules.textlint.json.TextlintJsonReader;
 import com.junichi11.netbeans.modules.textlint.options.TextlintOptions;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.base.input.LineProcessor;
@@ -48,6 +55,7 @@ public final class Textlint {
     private static final String FORMAT_PARAM = "--format"; // NOI18N
     private static final String FIX_PARAM = "--fix"; // NOI18N
     private static final String NO_COLOR_PARAM = "--no-color"; // NOI18N
+    private static final String STDIN_PARAM = "--stdin"; // NOI18N
 
     // format
     private static final String JSON_FORMAT = "json"; // NOI18N
@@ -72,6 +80,42 @@ public final class Textlint {
             throw new InvalidTextlintExecutableException("Invalid textlint path:" + path); // NOI18N
         }
         return new Textlint(path);
+    }
+
+    @CheckForNull
+    public TextlintJsonReader textlintForStdin(String text) {
+        ArrayList<String> allParams = new ArrayList<>();
+        allParams.add(path);
+        allParams.addAll(DEFAULT_PARAMS);
+        allParams.add(STDIN_PARAM);
+        // don't use org.netbeans.api.extexecution.base.ProcessBuilder
+        java.lang.ProcessBuilder processBuilder = new java.lang.ProcessBuilder(allParams);
+
+        // set working directory
+        String textlintrcPath = TextlintOptions.getInstance().getTextlintrcPath();
+        Path textlintrc = Paths.get(textlintrcPath);
+        Path parent = textlintrc.getParent();
+        if (parent != null) {
+            processBuilder.directory(parent.toFile());
+        }
+
+        try {
+            Process process = processBuilder.start();
+            OutputStream outputStream = process.getOutputStream();
+            InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+
+            new Thread(new PipeTask(inputStream, outputStream)).start();
+
+            process.waitFor();
+            InputStream resultInputStream = process.getInputStream();
+            Reader reader = new BufferedReader(new InputStreamReader(resultInputStream, StandardCharsets.UTF_8));
+            return new TextlintJsonReader(reader);
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, null, ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        return null;
     }
 
     public TextlintJsonReader textlint(String filePath) {
@@ -159,7 +203,8 @@ public final class Textlint {
         };
     }
 
-    private class JsonLineProcessor implements LineProcessor {
+    //~ inner classes
+    private static class JsonLineProcessor implements LineProcessor {
 
         StringBuilder sb = new StringBuilder();
 
@@ -185,6 +230,44 @@ public final class Textlint {
 
         public Reader getReader() {
             return new StringReader(sb.toString());
+        }
+    }
+
+    private static class PipeTask implements Runnable {
+
+        private final InputStream inputStream;
+        private final OutputStream outputStream;
+
+        public PipeTask(InputStream inputStream, OutputStream outputStream) {
+            this.inputStream = inputStream;
+            this.outputStream = outputStream;
+        }
+
+        @Override
+        public void run() {
+            byte[] buffer = new byte[1024];
+            int readByteNumber = 0;
+            while (readByteNumber > -1) {
+                try {
+                    readByteNumber = inputStream.read(buffer);
+                    if (readByteNumber > -1) {
+                        outputStream.write(buffer, 0, readByteNumber);
+                    }
+                } catch (IOException ex) {
+                    LOGGER.log(Level.WARNING, null, ex);
+                } finally {
+                    try {
+                        inputStream.close();
+                    } catch (IOException ex) {
+                        LOGGER.log(Level.WARNING, null, ex);
+                    }
+                    try {
+                        outputStream.close();
+                    } catch (IOException ex) {
+                        LOGGER.log(Level.WARNING, null, ex);
+                    }
+                }
+            }
         }
     }
 
