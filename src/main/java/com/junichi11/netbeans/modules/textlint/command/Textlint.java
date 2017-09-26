@@ -263,25 +263,25 @@ public final class Textlint {
         public void run() {
             byte[] buffer = new byte[1024];
             int readByteNumber = 0;
-            while (readByteNumber > -1) {
-                try {
+            try {
+                while (readByteNumber > -1) {
                     readByteNumber = inputStream.read(buffer);
                     if (readByteNumber > -1) {
                         outputStream.write(buffer, 0, readByteNumber);
                     }
+                }
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, null, ex);
+            } finally {
+                try {
+                    inputStream.close();
                 } catch (IOException ex) {
                     LOGGER.log(Level.WARNING, null, ex);
-                } finally {
-                    try {
-                        inputStream.close();
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.WARNING, null, ex);
-                    }
-                    try {
-                        outputStream.close();
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.WARNING, null, ex);
-                    }
+                }
+                try {
+                    outputStream.close();
+                } catch (IOException ex) {
+                    LOGGER.log(Level.WARNING, null, ex);
                 }
             }
         }
