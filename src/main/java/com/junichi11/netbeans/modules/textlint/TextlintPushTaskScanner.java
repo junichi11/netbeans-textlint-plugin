@@ -68,11 +68,13 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
     private TaskScanningScope scope;
     private Callback callback;
     private boolean useStdin = true;
+    private volatile boolean refreshing = false;
 
     private static final String TEXTLINT_GROUP_NAME = "nb-tasklist-textlint"; // NOI18N
     private static final String TEXTLINT_FIXABLE_GROUP_NAME = "nb-tasklist-textlint-fixable"; // NOI18N
     private static final RequestProcessor RP = new RequestProcessor(TextlintPushTaskScanner.class);
     private static final Map<FileObject, List<? extends Annotation>> ANNOTATIONS = new HashMap<>();
+    private static final Map<FileObject, TextlintJsonResult[]> RESUTS_CACHE = new HashMap<>();
     private static final Logger LOGGER = Logger.getLogger(TextlintPushTaskScanner.class.getName());
 
     private static TextlintPushTaskScanner INSTANCE;
@@ -91,7 +93,9 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
     public static void refresh() {
         if (INSTANCE != null) {
+            INSTANCE.refreshing = true;
             INSTANCE.setScope(INSTANCE.scope, INSTANCE.callback);
+            INSTANCE.refreshing = false;
         }
     }
 
@@ -100,8 +104,10 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
      */
     public static void refreshFile() {
         if (INSTANCE != null) {
+            INSTANCE.refreshing = true;
             INSTANCE.useStdin = false;
             INSTANCE.setScope(INSTANCE.scope, INSTANCE.callback);
+            INSTANCE.refreshing = false;
         }
     }
 
@@ -123,6 +129,9 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
         for (FileObject fileObject : fileObjects) {
             String ext = fileObject.getExt();
             if (isAvailableExt(ext)) {
+                if (refreshing) {
+                    removeCachedResults(fileObject);
+                }
                 currentTask = RP.post(() -> {
                     long taskStart = System.currentTimeMillis();
                     callback.started();
@@ -130,8 +139,14 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
                     File file = FileUtil.toFile(fileObject);
                     Document document = getDocument(fileObject);
                     try {
-                        TextlintJsonReader reader = getTextLintJsonReader(document, file);
-                        TextlintJsonResult[] results = getTextlintJsonResults(reader);
+                        TextlintJsonResult[] results = getCachedResults(fileObject);
+                        if (results == null) {
+                            TextlintJsonReader reader = getTextLintJsonReader(document, file);
+                            results = getTextlintJsonResults(reader);
+                            if (results.length > 0) {
+                                putCachedResults(fileObject, results);
+                            }
+                        }
 
                         // annotations
                         if (TextlintOptions.getInstance().showAnnotation()) {
@@ -154,6 +169,18 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
                 return; // only one file
             }
         }
+    }
+
+    private synchronized TextlintJsonResult[] removeCachedResults(FileObject fileObject) {
+         return RESUTS_CACHE.remove(fileObject);
+    }
+    private synchronized void putCachedResults(FileObject fileObject, TextlintJsonResult[] reuslts) {
+        RESUTS_CACHE.put(fileObject, reuslts);
+    }
+
+    @CheckForNull
+    private synchronized TextlintJsonResult[] getCachedResults(FileObject fileObject) {
+            return RESUTS_CACHE.get(fileObject);
     }
 
     @CheckForNull
