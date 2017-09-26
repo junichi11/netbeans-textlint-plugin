@@ -262,12 +262,15 @@ To refresh items, your document is saved once.&lt;/p&gt;
 &lt;h4&gt;Fix All&lt;/h4&gt;
 &lt;p&gt;You have to save your file before you run this action.&lt;br/&gt;
 If there are fixable rule&amp;rsquo;s errors, you can fix them. Right-click an item &gt; Click &lt;code&gt;Fix All&lt;/code&gt;.&lt;br/&gt;
-This action runs &lt;code&gt;textlint --fix&lt;/code&gt;command.&lt;/p&gt;
+This action runs &lt;code&gt;textlint --fix&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;h4&gt;Refresh&lt;/h4&gt;
+&lt;p&gt;You can refresh results forcibly by the following action: Right-click your editor &gt; Click "textlint Refresh".&lt;/p&gt;
 
 &lt;h3&gt;NOTE&lt;/h3&gt;
 &lt;ul&gt;
   &lt;li&gt;The plugin scans only current file.&lt;/li&gt;
-  &lt;li&gt;The plugin does not refresh if your file has modifications. Please save it.&lt;/li&gt;
+  &lt;li&gt;The plugin does not refresh results automatically. Please save your file or run the refresh action.&lt;/li&gt;
   &lt;li&gt;Use &lt;code&gt;UTF-8&lt;/code&gt; as file encoding and &lt;code&gt;LF&lt;/code&gt; as line endings.&lt;/li&gt;
   &lt;li&gt;This plugin may not work properly in Windows. (Please try to check above.)&lt;/li&gt;
   &lt;li&gt;If you cannot get expected results, just try to run the &lt;code&gt;textlint&lt;/code&gt; commands once in your CLI.&lt;/li&gt;

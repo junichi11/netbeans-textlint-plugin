@@ -93,10 +93,15 @@ You have to save your file before you run this action.
 If there are fixable rule's errors, you can fix them. Right-click an item > Click `Fix All`.
 This action runs `textlint --fix`command.
 
+#### Refresh
+
+You can refresh results forcibly by the following action: Right-click your editor > Click `textlint Refresh`.
+
+
 ### NOTE
 
 - The plugin scans only current file.
-- The plugin does not refresh if your file has modifications. Please save it.
+- The plugin does not refresh results automatically. Please save your file or run the refresh action.
 - Use `UTF-8` as file encoding and `LF` as line endings.
 - This plugin may not work properly in Windows. (Please try to check above.)
 - If you cannot get expected results, just try to run the `textlint` commands once in your CLI.
