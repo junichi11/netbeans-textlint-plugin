@@ -84,10 +84,7 @@ public final class Textlint {
 
     @CheckForNull
     public TextlintJsonReader textlintForStdin(String text) {
-        ArrayList<String> allParams = new ArrayList<>();
-        allParams.add(path);
-        allParams.addAll(DEFAULT_PARAMS);
-        allParams.add(STDIN_PARAM);
+        List<String> allParams = getAllParamsForStdin();
         // don't use org.netbeans.api.extexecution.base.ProcessBuilder
         java.lang.ProcessBuilder processBuilder = new java.lang.ProcessBuilder(allParams);
 
@@ -168,19 +165,33 @@ public final class Textlint {
         return ExecutionService.newService(processBuilder, executionDescriptor, title).run();
     }
 
-    private List<String> getAllParams(List<String> params) {
+    private List<String> getOptionsParams() {
         String options = TextlintOptions.getInstance().getTextlintOptions().trim();
-        List<String> allParams = new ArrayList<>();
+        List<String> params = new ArrayList<>();
         if (!options.isEmpty()) {
             String[] splitOptions = options.split("\\s"); // NOI18N
             for (String option : splitOptions) {
                 // prevent to add --fix prams
                 if (!option.equals(FIX_PARAM)) {
-                    allParams.add(option);
+                    params.add(option);
                 }
             }
         }
+        return params;
+    }
+
+    private List<String> getAllParams(List<String> params) {
+        List<String> allParams = getOptionsParams();
         allParams.addAll(params);
+        return allParams;
+    }
+
+    private List<String> getAllParamsForStdin() {
+        List<String> allParams = new ArrayList<>();
+        allParams.add(path);
+        allParams.addAll(DEFAULT_PARAMS);
+        allParams.addAll(getOptionsParams());
+        allParams.add(STDIN_PARAM);
         return allParams;
     }
 
