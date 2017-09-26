@@ -18,15 +18,23 @@ package com.junichi11.netbeans.modules.textlint.ui.actions;
 import com.junichi11.netbeans.modules.textlint.TextlintPushTaskScanner;
 import com.junichi11.netbeans.modules.textlint.command.InvalidTextlintExecutableException;
 import com.junichi11.netbeans.modules.textlint.command.Textlint;
-import com.junichi11.netbeans.modules.textlint.ui.UiUtils;
+import com.junichi11.netbeans.modules.textlint.json.TextlintJsonReader;
+import com.junichi11.netbeans.modules.textlint.json.TextlintJsonResult;
+import com.junichi11.netbeans.modules.textlint.json.TextlintJsonUtils;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.StyledDocument;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.editor.EditorRegistry;
+import org.netbeans.api.progress.BaseProgressUtils;
 import org.openide.loaders.DataObject;
+import org.openide.text.NbDocument;
 import org.openide.util.NbBundle;
 
 /**
@@ -52,21 +60,36 @@ public class FixAllAction extends AbstractAction {
     @NbBundle.Messages("FixAllAction.modified.file.error.message=Please save the file once.")
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (dataObject.isModified()) {
-            UiUtils.showErrorMessage(Bundle.FixAllAction_modified_file_error_message());
-            return;
-        }
-        try {
-            Textlint.getDefault().fix(filePath);
+        // XXX get results using stdin
+        // but if something occurs as problems, just use the file path parameter
+        JTextComponent lastFocusedComponent = EditorRegistry.lastFocusedComponent();
+        if (lastFocusedComponent != null) {
+            TextlintJsonReader[] reader = new TextlintJsonReader[1];
+            BaseProgressUtils.runOffEventDispatchThread(() -> {
+                try {
+                    reader[0] = Textlint.getDefault().fixForStdin(lastFocusedComponent.getText());
+                } catch (InvalidTextlintExecutableException ex) {
+                    LOGGER.log(Level.WARNING, ex.getMessage());
+                }
+            }, "textlint Fixing...", new AtomicBoolean(), true); // NOI18N
 
-            // prevent that annotations are detached
-            JTextComponent lastFocusedComponent = EditorRegistry.lastFocusedComponent();
-            if (lastFocusedComponent != null) {
-                lastFocusedComponent.requestFocusInWindow();
+            if (reader[0] != null) {
+                assert EventQueue.isDispatchThread();
+                TextlintJsonResult[] results = TextlintJsonUtils.createTextlintResults(reader[0]);
+                for (TextlintJsonResult result : results) {
+                    String output = result.getOutput();
+                    if (output != null && !output.isEmpty()) {
+                        Document document = lastFocusedComponent.getDocument();
+                        if (document instanceof StyledDocument) {
+                            NbDocument.runAtomic((StyledDocument) document, () -> {
+                                lastFocusedComponent.setText(output);
+                            });
+                            lastFocusedComponent.requestFocusInWindow();
+                            TextlintPushTaskScanner.refresh();
+                        }
+                    }
+                }
             }
-            TextlintPushTaskScanner.refreshFile();
-        } catch (InvalidTextlintExecutableException ex) {
-            LOGGER.log(Level.WARNING, ex.getMessage());
         }
     }
 

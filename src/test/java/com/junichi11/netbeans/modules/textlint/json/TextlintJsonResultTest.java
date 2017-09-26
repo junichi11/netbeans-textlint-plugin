@@ -96,4 +96,93 @@ public class TextlintJsonResultTest extends NbTestCase {
         assertEquals("JavaScript", fixSpellcehck.getText());
     }
 
+    @Test
+    public void testParseFixJsonResult() throws FileNotFoundException {
+        String fileName = TextlintJsonResult.class
+                .getClassLoader()
+                .getResource("com/junichi11/netbeans/modules/textlint/json/textlintFixJsonResult.json")
+                .getPath();
+        File file = new File(fileName);
+        TextlintJsonReader reader = new TextlintJsonReader(new FileReader(file));
+        TextlintJsonResult[] results = TextlintJsonUtils.createTextlintResults(reader);
+        assertEquals(1, results.length);
+        TextlintJsonResult result = results[0];
+        assertEquals("<text>", result.getFilePath());
+
+        assertEquals("# README\n\nSay JavaScript!\n\nHTML Imports is bad word. HTML Imports is correct.\n", result.getOutput());
+
+        // messages
+        List<Message> messages = result.getMessages();
+        assertEquals(2, messages.size());
+
+        Message message1 = messages.get(0);
+        assertEquals("lint", message1.getType());
+        assertEquals("spellcheck-tech-word", message1.getRuleId());
+        assertEquals("Javascript => JavaScript", message1.getMessage());
+        assertEquals(14, message1.getIndex());
+        assertEquals(3, message1.getLine());
+        assertEquals(5, message1.getColumn());
+        assertEquals(2, message1.getSeverity());
+
+        Fix fix1 = message1.getFix();
+        assertNotNull(fix1);
+        assertEquals(14, fix1.getRange()[0]);
+        assertEquals(24, fix1.getRange()[1]);
+        assertEquals("JavaScript", fix1.getText());
+
+        Message message2 = messages.get(1);
+        assertEquals("lint", message2.getType());
+        assertEquals("spellcheck-tech-word", message2.getRuleId());
+        assertEquals("HTML Import => HTML Imports", message2.getMessage());
+        assertEquals(27, message2.getIndex());
+        assertEquals(5, message2.getLine());
+        assertEquals(1, message2.getColumn());
+        assertEquals(2, message2.getSeverity());
+
+        Fix fix2 = message2.getFix();
+        assertNotNull(fix2);
+        assertEquals(27, fix2.getRange()[0]);
+        assertEquals(38, fix2.getRange()[1]);
+        assertEquals("HTML Imports", fix2.getText());
+
+        // applyingMessages
+        List<Message> applyingMessages = result.getApplyingMessages();
+        assertEquals(2, applyingMessages.size());
+
+        Message applyingMessage1 = applyingMessages.get(0);
+        assertEquals("lint", applyingMessage1.getType());
+        assertEquals("spellcheck-tech-word", applyingMessage1.getRuleId());
+        assertEquals("Javascript => JavaScript", applyingMessage1.getMessage());
+        assertEquals(14, applyingMessage1.getIndex());
+        assertEquals(3, applyingMessage1.getLine());
+        assertEquals(5, applyingMessage1.getColumn());
+        assertEquals(2, applyingMessage1.getSeverity());
+
+        Fix applyingFix1 = applyingMessage1.getFix();
+        assertNotNull(applyingFix1);
+        assertEquals(14, applyingFix1.getRange()[0]);
+        assertEquals(24, applyingFix1.getRange()[1]);
+        assertEquals("Javascript", applyingFix1.getText());
+
+        Message applyingMessage2 = applyingMessages.get(1);
+        assertEquals("lint", applyingMessage2.getType());
+        assertEquals("spellcheck-tech-word", applyingMessage2.getRuleId());
+        assertEquals("HTML Import => HTML Imports", applyingMessage2.getMessage());
+        assertEquals(27, applyingMessage2.getIndex());
+        assertEquals(5, applyingMessage2.getLine());
+        assertEquals(1, applyingMessage2.getColumn());
+        assertEquals(2, applyingMessage2.getSeverity());
+
+        Fix applyingFix2 = applyingMessage2.getFix();
+        assertNotNull(applyingFix2);
+        assertEquals(27, applyingFix2.getRange()[0]);
+        assertEquals(39, applyingFix2.getRange()[1]);
+        assertEquals("HTML Import", applyingFix2.getText());
+
+        // remainingMessages
+        List<Message> remaininingMessages = result.getRemainingMessages();
+        assertEquals(0, remaininingMessages.size());
+
+    }
+
 }

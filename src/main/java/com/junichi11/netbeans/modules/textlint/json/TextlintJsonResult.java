@@ -24,14 +24,29 @@ import java.util.List;
 public class TextlintJsonResult {
 
     private List<Message> messages;
+    private List<Message> applyingMessages;
+    private List<Message> remainingMessages;
     private String filePath;
+    private String output;
 
     public List<Message> getMessages() {
         return messages;
     }
 
+    public List<Message> getApplyingMessages() {
+        return applyingMessages;
+    }
+
+    public List<Message> getRemainingMessages() {
+        return remainingMessages;
+    }
+
     public String getFilePath() {
         return filePath;
+    }
+
+    public String getOutput() {
+        return output;
     }
 
 }

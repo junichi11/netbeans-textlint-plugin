@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.annotations.common.CheckForNull;
@@ -107,6 +108,13 @@ public final class Textlint {
         return new TextlintJsonReader(lineProcessor.getReader());
     }
 
+    @CheckForNull
+    public TextlintJsonReader fixForStdin(String text) {
+        List<String> allParams = getAllParamsForStdin();
+        allParams.add(FIX_PARAM);
+        return runForStdin(allParams, text);
+    }
+
     public void fix(String filePath) {
         List<String> params = new ArrayList<>();
         params.add(FIX_PARAM);
@@ -158,7 +166,9 @@ public final class Textlint {
 
             new Thread(new PipeTask(inputStream, outputStream)).start();
 
-            process.waitFor();
+            // prevent freezing: if buffer become full, netbeans freezes
+            process.waitFor(1000, TimeUnit.MILLISECONDS);
+
             InputStream resultInputStream = process.getInputStream();
             Reader reader = new BufferedReader(new InputStreamReader(resultInputStream, StandardCharsets.UTF_8));
             return new TextlintJsonReader(reader);

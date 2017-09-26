@@ -16,6 +16,9 @@
 package com.junichi11.netbeans.modules.textlint.json;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,12 +26,23 @@ import com.google.gson.Gson;
  */
 public final class TextlintJsonUtils {
 
+    private static final Logger LOGGER = Logger.getLogger(TextlintJsonUtils.class.getName());
+
     private TextlintJsonUtils() {
     }
 
     public static TextlintJsonResult[] createTextlintResults(TextlintJsonReader reader) {
         Gson gson = new Gson();
-        TextlintJsonResult[] results = gson.fromJson(reader.getReader(), TextlintJsonResult[].class);
+        TextlintJsonResult[] results;
+        if (reader == null) {
+            return new TextlintJsonResult[0];
+        }
+        try {
+            results = gson.fromJson(reader.getReader(), TextlintJsonResult[].class);
+        } catch (JsonSyntaxException ex) {
+            LOGGER.log(Level.WARNING, "Cannot get results as Json format. Did you Set rules?"); // NOI18N
+            results = new TextlintJsonResult[0];
+        }
         return results;
     }
 

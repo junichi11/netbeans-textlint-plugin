@@ -1,0 +1,57 @@
+[
+    {
+        "filePath": "<text>",
+        "output": "# README\n\nSay JavaScript!\n\nHTML Imports is bad word. HTML Imports is correct.\n",
+        "messages": [{
+                "type": "lint",
+                "ruleId": "spellcheck-tech-word",
+                "message": "Javascript => JavaScript",
+                "index": 14,
+                "line": 3,
+                "column": 5,
+                "severity": 2,
+                "fix": {
+                    "range": [14, 24],
+                    "text": "JavaScript"
+                }
+            }, {
+                "type": "lint",
+                "ruleId": "spellcheck-tech-word",
+                "message": "HTML Import => HTML Imports",
+                "index": 27,
+                "line": 5,
+                "column": 1,
+                "severity": 2,
+                "fix": {
+                    "range": [27, 38],
+                    "text": "HTML Imports"
+                }
+            }],
+        "applyingMessages": [{
+                "type": "lint",
+                "ruleId": "spellcheck-tech-word",
+                "message": "Javascript => JavaScript",
+                "index": 14,
+                "line": 3,
+                "column": 5,
+                "severity": 2,
+                "fix": {
+                    "range": [14, 24],
+                    "text": "Javascript"
+                }
+            }, {
+                "type": "lint",
+                "ruleId": "spellcheck-tech-word",
+                "message": "HTML Import => HTML Imports",
+                "index": 27,
+                "line": 5,
+                "column": 1,
+                "severity": 2,
+                "fix": {
+                    "range": [27, 39],
+                    "text": "HTML Import"
+                }
+            }],
+        "remainingMessages": []
+    }
+]
