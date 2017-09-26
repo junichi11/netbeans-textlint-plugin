@@ -85,34 +85,7 @@ public final class Textlint {
     @CheckForNull
     public TextlintJsonReader textlintForStdin(String text) {
         List<String> allParams = getAllParamsForStdin();
-        // don't use org.netbeans.api.extexecution.base.ProcessBuilder
-        java.lang.ProcessBuilder processBuilder = new java.lang.ProcessBuilder(allParams);
-
-        // set working directory
-        String textlintrcPath = TextlintOptions.getInstance().getTextlintrcPath();
-        Path textlintrc = Paths.get(textlintrcPath);
-        Path parent = textlintrc.getParent();
-        if (parent != null) {
-            processBuilder.directory(parent.toFile());
-        }
-
-        try {
-            Process process = processBuilder.start();
-            OutputStream outputStream = process.getOutputStream();
-            InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-
-            new Thread(new PipeTask(inputStream, outputStream)).start();
-
-            process.waitFor();
-            InputStream resultInputStream = process.getInputStream();
-            Reader reader = new BufferedReader(new InputStreamReader(resultInputStream, StandardCharsets.UTF_8));
-            return new TextlintJsonReader(reader);
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-        return null;
+        return runForStdin(allParams, text);
     }
 
     public TextlintJsonReader textlint(String filePath) {
@@ -163,6 +136,38 @@ public final class Textlint {
     private Future<Integer> run(ExecutionDescriptor executionDescriptor, List<String> params, String title) {
         ProcessBuilder processBuilder = createProcessBuilder(getAllParams(params));
         return ExecutionService.newService(processBuilder, executionDescriptor, title).run();
+    }
+
+    @CheckForNull
+    private TextlintJsonReader runForStdin(List<String> allParams, String text) {
+        // don't use org.netbeans.api.extexecution.base.ProcessBuilder
+        java.lang.ProcessBuilder processBuilder = new java.lang.ProcessBuilder(allParams);
+
+        // set working directory
+        String textlintrcPath = TextlintOptions.getInstance().getTextlintrcPath();
+        Path textlintrc = Paths.get(textlintrcPath);
+        Path parent = textlintrc.getParent();
+        if (parent != null) {
+            processBuilder.directory(parent.toFile());
+        }
+
+        try {
+            Process process = processBuilder.start();
+            OutputStream outputStream = process.getOutputStream();
+            InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+
+            new Thread(new PipeTask(inputStream, outputStream)).start();
+
+            process.waitFor();
+            InputStream resultInputStream = process.getInputStream();
+            Reader reader = new BufferedReader(new InputStreamReader(resultInputStream, StandardCharsets.UTF_8));
+            return new TextlintJsonReader(reader);
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, null, ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        return null;
     }
 
     private List<String> getOptionsParams() {
