@@ -96,6 +96,7 @@ This action runs `textlint --fix`command.
 #### Refresh
 
 You can refresh results forcibly by the following action: Right-click your editor > Click `textlint Refresh`.
+You can also set the shortcut key(Tools > Options > Keymap). 
 
 
 ### NOTE

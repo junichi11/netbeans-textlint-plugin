@@ -266,7 +266,7 @@ This action runs &lt;code&gt;textlint --fix&lt;/code&gt; command.&lt;/p&gt;
 
 &lt;h4&gt;Refresh&lt;/h4&gt;
 &lt;p&gt;You can refresh results forcibly by the following action: Right-click your editor &gt; Click "textlint Refresh".&lt;/p&gt;
-
+&lt;p&gt;You can also set the shortcut key(Tools &gt; Options &gt; Keymap). &lt;/p&gt;
 &lt;h3&gt;NOTE&lt;/h3&gt;
 &lt;ul&gt;
   &lt;li&gt;The plugin scans only current file.&lt;/li&gt;
