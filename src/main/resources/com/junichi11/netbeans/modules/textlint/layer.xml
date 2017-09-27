@@ -29,4 +29,13 @@
             </file>
         </folder>
     </folder>
+    <folder name="OptionsExport">
+        <folder name="Editor">
+            <file name="textlint">
+                <attr name="include" stringvalue="config/Preferences/com/junichi11/netbeans/modules/textlint/textlint.properties"/>
+                <attr name="displayName" bundlevalue="com.junichi11.netbeans.modules.textlint.resources.Bundle#LBL_TextlintExportDisplayName"/>
+                <attr name="position" intvalue="1000"/>
+            </file>
+        </folder>
+    </folder>
 </filesystem>
