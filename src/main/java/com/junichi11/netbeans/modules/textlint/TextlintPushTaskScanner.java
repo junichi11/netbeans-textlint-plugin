@@ -118,6 +118,11 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
             return;
         }
 
+        String textlintPath = TextlintOptions.getInstance().getTextlintPath();
+        if (textlintPath == null || textlintPath.isEmpty()) {
+            return;
+        }
+
         // cancel
         if (currentTask != null && !currentTask.isFinished()) {
             currentTask.cancel();
@@ -172,15 +177,16 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
     }
 
     private synchronized TextlintJsonResult[] removeCachedResults(FileObject fileObject) {
-         return RESUTS_CACHE.remove(fileObject);
+        return RESUTS_CACHE.remove(fileObject);
     }
+
     private synchronized void putCachedResults(FileObject fileObject, TextlintJsonResult[] reuslts) {
         RESUTS_CACHE.put(fileObject, reuslts);
     }
 
     @CheckForNull
     private synchronized TextlintJsonResult[] getCachedResults(FileObject fileObject) {
-            return RESUTS_CACHE.get(fileObject);
+        return RESUTS_CACHE.get(fileObject);
     }
 
     @CheckForNull
