@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -43,6 +46,8 @@ import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.base.input.LineProcessor;
 import org.netbeans.api.extexecution.base.input.InputProcessors;
 import org.netbeans.api.extexecution.base.ProcessBuilder;
+import org.netbeans.api.extexecution.base.input.InputReaderTask;
+import org.netbeans.api.extexecution.base.input.InputReaders;
 import org.netbeans.api.options.OptionsDisplayer;
 import org.openide.windows.InputOutput;
 
@@ -164,14 +169,21 @@ public final class Textlint {
 
         try {
             Process process = processBuilder.start();
-            OutputStream outputStream = process.getOutputStream();
-            InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+            InputStreamReader inputStreamReader = new InputStreamReader(
+                    new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)),
+                    StandardCharsets.UTF_8
+            );
 
-            new Thread(new PipeTask(inputStream, outputStream)).start();
+            InputReaderTask inputReaderTask = InputReaderTask.newTask(
+                    InputReaders.forReader(inputStreamReader),
+                    InputProcessors.copying(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8))
+            );
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.submit(inputReaderTask);
 
             // prevent freezing: if buffer become full, netbeans freezes
             process.waitFor(1000, TimeUnit.MILLISECONDS);
-
+            executorService.shutdownNow();
             InputStream resultInputStream = process.getInputStream();
             Reader reader = new BufferedReader(new InputStreamReader(resultInputStream, StandardCharsets.UTF_8));
             return new TextlintJsonReader(reader);
@@ -259,44 +271,6 @@ public final class Textlint {
 
         public Reader getReader() {
             return new StringReader(sb.toString());
-        }
-    }
-
-    private static class PipeTask implements Runnable {
-
-        private final InputStream inputStream;
-        private final OutputStream outputStream;
-
-        public PipeTask(InputStream inputStream, OutputStream outputStream) {
-            this.inputStream = inputStream;
-            this.outputStream = outputStream;
-        }
-
-        @Override
-        public void run() {
-            byte[] buffer = new byte[1024];
-            int readByteNumber = 0;
-            try {
-                while (readByteNumber > -1) {
-                    readByteNumber = inputStream.read(buffer);
-                    if (readByteNumber > -1) {
-                        outputStream.write(buffer, 0, readByteNumber);
-                    }
-                }
-            } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, null, ex);
-            } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, null, ex);
-                }
-                try {
-                    outputStream.close();
-                } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, null, ex);
-                }
-            }
         }
     }
 
