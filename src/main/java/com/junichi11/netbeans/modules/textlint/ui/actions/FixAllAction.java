@@ -81,15 +81,25 @@ public class FixAllAction extends AbstractAction {
                     if (output != null && !output.isEmpty()) {
                         Document document = lastFocusedComponent.getDocument();
                         if (document instanceof StyledDocument) {
+                            int caretPosition = lastFocusedComponent.getCaretPosition();
                             NbDocument.runAtomic((StyledDocument) document, () -> {
                                 lastFocusedComponent.setText(output);
                             });
                             lastFocusedComponent.requestFocusInWindow();
+                            setCaretPosition(caretPosition, output.length(), lastFocusedComponent);
                             TextlintPushTaskScanner.refresh();
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void setCaretPosition(int caretPosition, int outputLength, JTextComponent lastFocusedComponent) {
+        if (0 <= caretPosition && caretPosition <= outputLength) {
+            lastFocusedComponent.setCaretPosition(caretPosition);
+        } else {
+            lastFocusedComponent.setCaretPosition(0);
         }
     }
 
