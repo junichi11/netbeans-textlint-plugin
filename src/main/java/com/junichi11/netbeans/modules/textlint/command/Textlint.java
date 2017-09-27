@@ -17,6 +17,12 @@ package com.junichi11.netbeans.modules.textlint.command;
 
 import com.junichi11.netbeans.modules.textlint.json.TextlintJsonReader;
 import com.junichi11.netbeans.modules.textlint.options.TextlintOptions;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -26,14 +32,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.base.input.LineProcessor;
 import org.netbeans.api.extexecution.base.input.InputProcessors;
 import org.netbeans.api.extexecution.base.ProcessBuilder;
+import org.netbeans.api.extexecution.base.input.InputReaderTask;
+import org.netbeans.api.extexecution.base.input.InputReaders;
 import org.openide.windows.InputOutput;
 
 /**
@@ -48,6 +60,7 @@ public final class Textlint {
     private static final String FORMAT_PARAM = "--format"; // NOI18N
     private static final String FIX_PARAM = "--fix"; // NOI18N
     private static final String NO_COLOR_PARAM = "--no-color"; // NOI18N
+    private static final String STDIN_PARAM = "--stdin"; // NOI18N
 
     // format
     private static final String JSON_FORMAT = "json"; // NOI18N
@@ -74,6 +87,12 @@ public final class Textlint {
         return new Textlint(path);
     }
 
+    @CheckForNull
+    public TextlintJsonReader textlintForStdin(String text) {
+        List<String> allParams = getAllParamsForStdin();
+        return runForStdin(allParams, text);
+    }
+
     public TextlintJsonReader textlint(String filePath) {
         List<String> params = new ArrayList<>(DEFAULT_PARAMS);
         params.add(filePath);
@@ -91,6 +110,13 @@ public final class Textlint {
             LOGGER.log(Level.WARNING, null, ex);
         }
         return new TextlintJsonReader(lineProcessor.getReader());
+    }
+
+    @CheckForNull
+    public TextlintJsonReader fixForStdin(String text) {
+        List<String> allParams = getAllParamsForStdin();
+        allParams.add(FIX_PARAM);
+        return runForStdin(allParams, text);
     }
 
     public void fix(String filePath) {
@@ -124,19 +150,74 @@ public final class Textlint {
         return ExecutionService.newService(processBuilder, executionDescriptor, title).run();
     }
 
-    private List<String> getAllParams(List<String> params) {
+    @CheckForNull
+    private TextlintJsonReader runForStdin(List<String> allParams, String text) {
+        // don't use org.netbeans.api.extexecution.base.ProcessBuilder
+        java.lang.ProcessBuilder processBuilder = new java.lang.ProcessBuilder(allParams);
+
+        // set working directory
+        String textlintrcPath = TextlintOptions.getInstance().getTextlintrcPath();
+        Path textlintrc = Paths.get(textlintrcPath);
+        Path parent = textlintrc.getParent();
+        if (parent != null) {
+            processBuilder.directory(parent.toFile());
+        }
+
+        try {
+            Process process = processBuilder.start();
+            InputStreamReader inputStreamReader = new InputStreamReader(
+                    new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)),
+                    StandardCharsets.UTF_8
+            );
+
+            InputReaderTask inputReaderTask = InputReaderTask.newTask(
+                    InputReaders.forReader(inputStreamReader),
+                    InputProcessors.copying(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8))
+            );
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.submit(inputReaderTask);
+
+            // prevent freezing: if buffer become full, netbeans freezes
+            process.waitFor(1000, TimeUnit.MILLISECONDS);
+            executorService.shutdownNow();
+            InputStream resultInputStream = process.getInputStream();
+            Reader reader = new BufferedReader(new InputStreamReader(resultInputStream, StandardCharsets.UTF_8));
+            return new TextlintJsonReader(reader);
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, null, ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        return null;
+    }
+
+    private List<String> getOptionsParams() {
         String options = TextlintOptions.getInstance().getTextlintOptions().trim();
-        List<String> allParams = new ArrayList<>();
+        List<String> params = new ArrayList<>();
         if (!options.isEmpty()) {
             String[] splitOptions = options.split("\\s"); // NOI18N
             for (String option : splitOptions) {
                 // prevent to add --fix prams
                 if (!option.equals(FIX_PARAM)) {
-                    allParams.add(option);
+                    params.add(option);
                 }
             }
         }
+        return params;
+    }
+
+    private List<String> getAllParams(List<String> params) {
+        List<String> allParams = getOptionsParams();
         allParams.addAll(params);
+        return allParams;
+    }
+
+    private List<String> getAllParamsForStdin() {
+        List<String> allParams = new ArrayList<>();
+        allParams.add(path);
+        allParams.addAll(DEFAULT_PARAMS);
+        allParams.addAll(getOptionsParams());
+        allParams.add(STDIN_PARAM);
         return allParams;
     }
 
@@ -159,7 +240,8 @@ public final class Textlint {
         };
     }
 
-    private class JsonLineProcessor implements LineProcessor {
+    //~ inner classes
+    private static class JsonLineProcessor implements LineProcessor {
 
         StringBuilder sb = new StringBuilder();
 

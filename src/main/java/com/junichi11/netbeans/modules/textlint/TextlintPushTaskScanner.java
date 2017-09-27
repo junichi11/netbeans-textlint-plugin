@@ -20,6 +20,7 @@ import com.junichi11.netbeans.modules.textlint.annotations.TextlintFixableAnnota
 import com.junichi11.netbeans.modules.textlint.command.InvalidTextlintExecutableException;
 import com.junichi11.netbeans.modules.textlint.command.Textlint;
 import com.junichi11.netbeans.modules.textlint.json.Fix;
+import com.junichi11.netbeans.modules.textlint.json.Message;
 import com.junichi11.netbeans.modules.textlint.json.TextlintJsonReader;
 import com.junichi11.netbeans.modules.textlint.json.TextlintJsonUtils;
 import com.junichi11.netbeans.modules.textlint.json.TextlintJsonResult;
@@ -37,10 +38,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Action;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.spi.tasklist.PushTaskScanner;
 import org.netbeans.spi.tasklist.Task;
 import org.netbeans.spi.tasklist.TaskScanningScope;
-import org.openide.awt.StatusDisplayer;
+import org.openide.cookies.EditorCookie;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileChangeAdapter;
 import org.openide.filesystems.FileEvent;
@@ -50,7 +54,6 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Annotation;
 import org.openide.text.Line;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.ServiceProvider;
@@ -64,15 +67,18 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
     private TaskScanningScope scope;
     private Callback callback;
+    private boolean useStdin = true;
+    private volatile boolean refreshing = false;
 
     private static final String TEXTLINT_GROUP_NAME = "nb-tasklist-textlint"; // NOI18N
     private static final String TEXTLINT_FIXABLE_GROUP_NAME = "nb-tasklist-textlint-fixable"; // NOI18N
     private static final RequestProcessor RP = new RequestProcessor(TextlintPushTaskScanner.class);
-    private static final Logger LOGGER = Logger.getLogger(TextlintPushTaskScanner.class.getName());
-    private static TextlintPushTaskScanner INSTANCE;
     private static final Map<FileObject, List<? extends Annotation>> ANNOTATIONS = new HashMap<>();
+    private static final Map<FileObject, TextlintJsonResult[]> RESUTS_CACHE = new HashMap<>();
+    private static final Logger LOGGER = Logger.getLogger(TextlintPushTaskScanner.class.getName());
+
+    private static TextlintPushTaskScanner INSTANCE;
     private static RequestProcessor.Task currentTask;
-    private static boolean refreshing;
 
     @NbBundle.Messages({
         "TextlintPushTaskScanner.displayName=textlint",
@@ -87,17 +93,33 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
     public static void refresh() {
         if (INSTANCE != null) {
-            refreshing = true;
+            INSTANCE.refreshing = true;
             INSTANCE.setScope(INSTANCE.scope, INSTANCE.callback);
-            refreshing = false;
+            INSTANCE.refreshing = false;
         }
     }
 
-    @NbBundle.Messages("TextlintPushTaskScanner.error.message.modified.file=File was modified or not found. Please save it for scanning.")
+    /**
+     * Scan using the file path.
+     */
+    public static void refreshFile() {
+        if (INSTANCE != null) {
+            INSTANCE.refreshing = true;
+            INSTANCE.useStdin = false;
+            INSTANCE.setScope(INSTANCE.scope, INSTANCE.callback);
+            INSTANCE.refreshing = false;
+        }
+    }
+
     @Override
     public void setScope(TaskScanningScope scope, Callback callback) {
         if (scope == null || callback == null) {
             removeAllAnnotations();
+            return;
+        }
+
+        String textlintPath = TextlintOptions.getInstance().getTextlintPath();
+        if (textlintPath == null || textlintPath.isEmpty()) {
             return;
         }
 
@@ -111,20 +133,26 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
         Collection<? extends FileObject> fileObjects = scope.getLookup().lookupAll(FileObject.class);
         for (FileObject fileObject : fileObjects) {
             String ext = fileObject.getExt();
-            boolean canBeRun = canBeRun(fileObject);
-            if (!canBeRun) {
-                StatusDisplayer.getDefault().setStatusText(Bundle.TextlintPushTaskScanner_error_message_modified_file());
-            }
-            if (isAvailableExt(ext) && canBeRun) {
+            if (isAvailableExt(ext)) {
+                if (refreshing) {
+                    removeCachedResults(fileObject);
+                }
                 currentTask = RP.post(() -> {
+                    long taskStart = System.currentTimeMillis();
                     callback.started();
                     callback.clearAllTasks();
                     File file = FileUtil.toFile(fileObject);
-                    LOGGER.log(Level.FINE, "textlint scans the file:{0}", file.getAbsolutePath()); // NOI18N
-                    TextlintJsonReader reader;
+                    Document document = getDocument(fileObject);
                     try {
-                        reader = Textlint.getDefault().textlint(file.getAbsolutePath());
-                        TextlintJsonResult[] results = TextlintJsonUtils.createTextlintResults(reader);
+                        TextlintJsonResult[] results = getCachedResults(fileObject);
+                        if (results == null) {
+                            TextlintJsonReader reader = getTextLintJsonReader(document, file);
+                            results = getTextlintJsonResults(reader);
+                            if (results.length > 0) {
+                                putCachedResults(fileObject, results);
+                            }
+                        }
+
                         // annotations
                         if (TextlintOptions.getInstance().showAnnotation()) {
                             updateAnnotations(fileObject, AnnotationCreator.create(results, fileObject));
@@ -135,25 +163,77 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
                         }
                         // tasks
                         callback.setTasks(fileObject, TaskCreator.create(results, fileObject));
-                    } catch (InvalidTextlintExecutableException ex) {
+                    } catch (InvalidTextlintExecutableException | BadLocationException ex) {
                         LOGGER.log(Level.WARNING, ex.getMessage());
                     } finally {
                         callback.finished();
                     }
+                    long taskEnd = System.currentTimeMillis();
+                    LOGGER.log(Level.FINE, "textlint task:{0} {1}ms", new Object[]{file.getAbsolutePath(), taskEnd - taskStart}); // NOI18N
                 });
-                return;
+                return; // only one file
             }
         }
     }
 
-    private static boolean canBeRun(FileObject fileObject) {
+    private synchronized TextlintJsonResult[] removeCachedResults(FileObject fileObject) {
+        return RESUTS_CACHE.remove(fileObject);
+    }
+
+    private synchronized void putCachedResults(FileObject fileObject, TextlintJsonResult[] reuslts) {
+        RESUTS_CACHE.put(fileObject, reuslts);
+    }
+
+    @CheckForNull
+    private synchronized TextlintJsonResult[] getCachedResults(FileObject fileObject) {
+        return RESUTS_CACHE.get(fileObject);
+    }
+
+    @CheckForNull
+    private Document getDocument(FileObject fileObject) {
+        Document document = null;
         try {
             DataObject dataObject = DataObject.find(fileObject);
-            return refreshing || !dataObject.isModified();
+            EditorCookie editorCookie = dataObject.getLookup().lookup(EditorCookie.class);
+            document = editorCookie.getDocument();
         } catch (DataObjectNotFoundException ex) {
-            // don't run if DataObject doesn't exist
+            LOGGER.log(Level.WARNING, null, ex);
         }
-        return false;
+        return document;
+    }
+
+    /**
+     * If the current file document is not null, scan the current document text.
+     *
+     * @param document current document
+     * @param file current file
+     * @return the reader
+     * @throws InvalidTextlintExecutableException
+     * @throws BadLocationException
+     */
+    private TextlintJsonReader getTextLintJsonReader(Document document, File file) throws InvalidTextlintExecutableException, BadLocationException {
+        long startTime = System.currentTimeMillis();
+        TextlintJsonReader reader;
+        if (document == null || !useStdin) {
+            useStdin = true;
+            reader = Textlint.getDefault().textlint(file.getAbsolutePath());
+        } else {
+            String text = document.getText(0, document.getLength());
+            reader = Textlint.getDefault().textlintForStdin(text);
+        }
+        long endTime = System.currentTimeMillis();
+        LOGGER.log(Level.FINE, "Run textlint command: {0}ms", endTime - startTime); // NOI18N
+        return reader;
+    }
+
+    private TextlintJsonResult[] getTextlintJsonResults(TextlintJsonReader reader) {
+        TextlintJsonResult[] results;
+        if (reader != null) {
+            results = TextlintJsonUtils.createTextlintResults(reader);
+        } else {
+            results = new TextlintJsonResult[0];
+        }
+        return results;
     }
 
     private static boolean isAvailableExt(String ext) {
@@ -185,6 +265,34 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
         ANNOTATIONS.clear();
     }
 
+    private static DataObject getDataObject(FileObject fileObject) {
+        DataObject dObject;
+        try {
+            dObject = DataObject.find(fileObject);
+        } catch (DataObjectNotFoundException ex) {
+            dObject = null;
+        }
+        return dObject;
+    }
+
+    private static Line getCurrentLine(Line.Set lineSet, int lineNumber) throws IndexOutOfBoundsException {
+        Line line;
+        if (lineNumber > 0) {
+            line = lineSet.getCurrent(lineNumber - 1);
+        } else {
+            line = lineSet.getCurrent(0);
+        }
+        return line;
+    }
+
+    private static Line.Set getLineSet(DataObject dataObject) {
+        LineCookie lineCookie = dataObject.getLookup().lookup(LineCookie.class);
+        if (lineCookie != null) {
+            return lineCookie.getLineSet();
+        }
+        return null;
+    }
+
     //~ inner classes
     private static class AnnotationCreator {
 
@@ -192,53 +300,51 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
         public static List<? extends Annotation> create(TextlintJsonResult[] results, FileObject fileObject) {
             List<TextlintAnnotation> annotations = new ArrayList<>();
-            DataObject dObject = null;
-            try {
-                dObject = DataObject.find(fileObject);
-            } catch (DataObjectNotFoundException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            final DataObject dataObject = dObject;
+            final DataObject dataObject = getDataObject(fileObject);
             if (results != null && dataObject != null) {
-                LineCookie lineCookie = dataObject.getLookup().lookup(LineCookie.class);
-                final Line.Set lineSet = lineCookie != null ? lineCookie.getLineSet() : null;
-                for (TextlintJsonResult result : results) {
-                    result.getMessages().forEach((message) -> {
-                        // attach annotations
-                        int lineNumber = message.getLine();
-                        if (lineSet != null && lineNumber > 0) {
-                            Line line = lineSet.getOriginal(lineNumber - 1);
+                final Line.Set lineSet = getLineSet(dataObject);
+                if (lineSet != null) {
+                    for (TextlintJsonResult result : results) {
+                        result.getMessages().forEach((message) -> {
+                            // attach annotations
+                            int lineNumber = message.getLine();
+                            Line line = getCurrentLine(lineSet, lineNumber);
                             if (line != null) {
-                                TextlintAnnotation annotation;
-                                if (message.getFix() != null) {
-                                    annotation = new TextlintFixableAnnotation(String.format(MESSAGE_FORMAT, message.getRuleId(), message.getMessage()));
-                                } else {
-                                    annotation = new TextlintAnnotation(String.format(MESSAGE_FORMAT, message.getRuleId(), message.getMessage()));
-                                }
+                                TextlintAnnotation annotation = createAnnotation(message);
                                 annotation.attach(line);
                                 annotations.add(annotation);
                             }
+                        });
+                    }
+
+                    fileObject.addFileChangeListener(new FileChangeAdapter() {
+                        @Override
+                        public void fileChanged(FileEvent fe) {
+                            fileObject.removeFileChangeListener(this);
+                            annotations.forEach(annotation -> annotation.detach());
+                            removeAnnotations(fileObject);
+                        }
+
+                        @Override
+                        public void fileDeleted(FileEvent fe) {
+                            fileObject.removeFileChangeListener(this);
+                            annotations.forEach(annotation -> annotation.detach());
+                            removeAnnotations(fileObject);
                         }
                     });
                 }
-
-                fileObject.addFileChangeListener(new FileChangeAdapter() {
-                    @Override
-                    public void fileChanged(FileEvent fe) {
-                        fileObject.removeFileChangeListener(this);
-                        annotations.forEach(annotation -> annotation.detach());
-                        removeAnnotations(fileObject);
-                    }
-
-                    @Override
-                    public void fileDeleted(FileEvent fe) {
-                        fileObject.removeFileChangeListener(this);
-                        annotations.forEach(annotation -> annotation.detach());
-                        removeAnnotations(fileObject);
-                    }
-                });
             }
             return annotations;
+        }
+
+        private static TextlintAnnotation createAnnotation(Message message) {
+            TextlintAnnotation annotation;
+            if (message.getFix() != null) {
+                annotation = new TextlintFixableAnnotation(String.format(MESSAGE_FORMAT, message.getRuleId(), message.getMessage()));
+            } else {
+                annotation = new TextlintAnnotation(String.format(MESSAGE_FORMAT, message.getRuleId(), message.getMessage()));
+            }
+            return annotation;
         }
     }
 
@@ -248,26 +354,24 @@ public class TextlintPushTaskScanner extends PushTaskScanner {
 
         public static List<Task> create(TextlintJsonResult[] results, FileObject fileObject) {
             List<Task> tasks = new ArrayList<>();
-            DataObject dObject;
-            try {
-                dObject = DataObject.find(fileObject);
-            } catch (DataObjectNotFoundException ex) {
-                dObject = null;
-            }
-            final DataObject dataObject = dObject;
+            final DataObject dataObject = getDataObject(fileObject);
             if (results != null && dataObject != null) {
-                for (TextlintJsonResult result : results) {
-                    result.getMessages().forEach((message) -> {
-                        OpenAction defaultAction = new OpenAction(message.getLine(), dataObject);
-                        Action[] popupActions = createPopupActions(dataObject, fileObject, message.getFix());
-                        String description = String.format(MESSAGE_FORMAT,
-                                message.getRuleId(),
-                                message.getMessage(),
-                                message.getLine(),
-                                message.getIndex());
-                        String groupName = message.getFix() != null ? TEXTLINT_FIXABLE_GROUP_NAME : TEXTLINT_GROUP_NAME;
-                        tasks.add(Task.create(fileObject.toURL(), groupName, description, defaultAction, popupActions));
-                    });
+                Line.Set lineSet = getLineSet(dataObject);
+                if (lineSet != null) {
+                    for (TextlintJsonResult result : results) {
+                        result.getMessages().forEach((message) -> {
+                            Line line = getCurrentLine(lineSet, message.getLine());
+                            OpenAction defaultAction = line != null ? new OpenAction(line) : null;
+                            Action[] popupActions = createPopupActions(dataObject, fileObject, message.getFix());
+                            String description = String.format(MESSAGE_FORMAT,
+                                    message.getRuleId(),
+                                    message.getMessage(),
+                                    message.getLine(),
+                                    message.getIndex());
+                            String groupName = message.getFix() != null ? TEXTLINT_FIXABLE_GROUP_NAME : TEXTLINT_GROUP_NAME;
+                            tasks.add(Task.create(fileObject.toURL(), groupName, description, defaultAction, popupActions));
+                        });
+                    }
                 }
             }
             return tasks;
