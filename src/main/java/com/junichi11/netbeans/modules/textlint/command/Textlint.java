@@ -17,6 +17,7 @@ package com.junichi11.netbeans.modules.textlint.command;
 
 import com.junichi11.netbeans.modules.textlint.json.TextlintJsonReader;
 import com.junichi11.netbeans.modules.textlint.options.TextlintOptions;
+import com.junichi11.netbeans.modules.textlint.options.TextlintOptionsPanelController;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.base.input.LineProcessor;
 import org.netbeans.api.extexecution.base.input.InputProcessors;
 import org.netbeans.api.extexecution.base.ProcessBuilder;
+import org.netbeans.api.options.OptionsDisplayer;
 import org.openide.windows.InputOutput;
 
 /**
@@ -78,6 +80,7 @@ public final class Textlint {
     public static Textlint getDefault() throws InvalidTextlintExecutableException {
         String path = TextlintOptions.getInstance().getTextlintPath();
         if (path == null || path.isEmpty()) {
+            OptionsDisplayer.getDefault().open(TextlintOptionsPanelController.OPTIONS_FULL_PATH);
             throw new InvalidTextlintExecutableException("Invalid textlint path:" + path); // NOI18N
         }
         return new Textlint(path);
