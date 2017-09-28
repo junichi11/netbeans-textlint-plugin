@@ -243,7 +243,9 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
                 textlintRefreshOnSaveCheckBox.setSelected(refreshOnSave != null ? Boolean.valueOf(refreshOnSave) : options.refreshOnSave());
                 String showAnnotation = properties.getProperty(TextlintOptions.TEXTLINT_SHOW_ANNOTATION);
                 textlintShowAnnotationsCheckBox.setSelected(showAnnotation != null ? Boolean.valueOf(showAnnotation) : options.showAnnotation());
-                store();
+                if (valid()) {
+                    store();
+                }
             }
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Please try to check your .nbp/textlint file. e.g. properties file format", ex); // NOI18N
