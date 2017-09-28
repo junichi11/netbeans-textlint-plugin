@@ -21,9 +21,14 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.ChangeSupport;
 import org.openide.util.NbBundle;
 
 final class TextlintOptionsPanel extends javax.swing.JPanel {
@@ -32,14 +37,32 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
     private static final String TEXTLINTRC_LAST_FOLDER_SUFFIX = ".textlintrc"; // NOI18N
     private static final long serialVersionUID = -7873059711550842158L;
     private static final Logger LOGGER = Logger.getLogger(TextlintOptionsPanel.class.getName());
+    private final ChangeSupport changeSupport = new ChangeSupport(this);
 
     private final TextlintOptionsPanelController controller;
 
     TextlintOptionsPanel(TextlintOptionsPanelController controller) {
         this.controller = controller;
         initComponents();
-        // TODO add listeners
-        // TODO listen to changes in form fields and call controller.changed()
+        setError(""); // NOI18N
+        errorLabel.setForeground(UIManager.getColor("nb.errorForeground")); // NOI18N
+
+        // add listeners
+        DocumentListener documentListener = new DefaultDocumentListener();
+        textlintPathTextField.getDocument().addDocumentListener(documentListener);
+        textlintrcPathTextField.getDocument().addDocumentListener(documentListener);
+    }
+
+    private void fireChange() {
+        changeSupport.fireChange();
+    }
+
+    public void addChangeListener(ChangeListener changeListener) {
+        changeSupport.addChangeListener(changeListener);
+    }
+
+    public void removeChangeListener(ChangeListener changeListener) {
+        changeSupport.removeChangeListener(changeListener);
     }
 
     /**
@@ -61,6 +84,7 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
         textlintrcPathBrowsButton = new javax.swing.JButton();
         textlintRefreshOnSaveCheckBox = new javax.swing.JCheckBox();
         textlintShowAnnotationsCheckBox = new javax.swing.JCheckBox();
+        errorLabel = new javax.swing.JLabel();
 
         org.openide.awt.Mnemonics.setLocalizedText(textlintPathLabel, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintPathLabel.text")); // NOI18N
 
@@ -94,6 +118,8 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(textlintShowAnnotationsCheckBox, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintShowAnnotationsCheckBox.text")); // NOI18N
 
+        org.openide.awt.Mnemonics.setLocalizedText(errorLabel, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.errorLabel.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -118,7 +144,8 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(textlintHtmlCheckBox)
                     .addComponent(textlintRefreshOnSaveCheckBox)
-                    .addComponent(textlintShowAnnotationsCheckBox))
+                    .addComponent(textlintShowAnnotationsCheckBox)
+                    .addComponent(errorLabel))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -142,7 +169,9 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(textlintRefreshOnSaveCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(textlintShowAnnotationsCheckBox))
+                .addComponent(textlintShowAnnotationsCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(errorLabel))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -221,12 +250,50 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
         }
     }
 
+    @NbBundle.Messages({
+        "TextlintOptionsPanel.invalid.textlint.path=Existing file path must be set.",
+        "TextlintOptionsPanel.invalid.textlintrc.path=Existing file path must be set.",
+        "TextlintOptionsPanel.invalid.textlintrc.name=File name is not .textlintrc"
+    })
     boolean valid() {
-        // TODO check whether form is consistent and complete
+        // textlint path
+        String textlintPathString = textlintPathTextField.getText().trim();
+        File textlintFile = new File(textlintPathString);
+        if (!textlintPathString.isEmpty() && !textlintFile.exists()) {
+            setError(Bundle.TextlintOptionsPanel_invalid_textlint_path());
+            return false;
+        }
+
+        // .textlintrc path
+        String textlintrcPathString = textlintrcPathTextField.getText().trim();
+        File textlintrcFile = new File(textlintrcPathString);
+        if (!textlintrcPathString.isEmpty()) {
+            if (!textlintrcFile.exists()) {
+                setError(Bundle.TextlintOptionsPanel_invalid_textlintrc_path());
+                return false;
+            }
+            if (!textlintrcPathString.endsWith(".textlintrc")) { // NOI18N
+                setError(Bundle.TextlintOptionsPanel_invalid_textlintrc_name());
+                return false;
+            }
+        }
+
+        controller.cancel();
+        setError(""); // NOI18N
         return true;
     }
 
+    private void setError(String message) {
+        if (message == null) {
+            errorLabel.setText(""); // NOI18N
+        } else {
+            errorLabel.setText(message);
+        }
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel errorLabel;
     private javax.swing.JCheckBox textlintHtmlCheckBox;
     private javax.swing.JLabel textlintOptionsLabel;
     private javax.swing.JTextField textlintOptionsTextField;
@@ -239,4 +306,30 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JLabel textlintrcPathLabel;
     private javax.swing.JTextField textlintrcPathTextField;
     // End of variables declaration//GEN-END:variables
+
+    //~ inner class
+    private class DefaultDocumentListener implements DocumentListener {
+
+        public DefaultDocumentListener() {
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            processUpdate();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            processUpdate();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            processUpdate();
+        }
+
+        private void processUpdate() {
+            fireChange();
+        }
+    }
 }

@@ -19,6 +19,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
@@ -35,7 +37,7 @@ import org.openide.util.NbBundle;
     "AdvancedOption_DisplayName_Textlint=textlint",
     "AdvancedOption_Keywords_Textlint=textlint"
 })
-public final class TextlintOptionsPanelController extends OptionsPanelController {
+public final class TextlintOptionsPanelController extends OptionsPanelController implements ChangeListener {
 
     private TextlintOptionsPanel panel;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -60,6 +62,7 @@ public final class TextlintOptionsPanelController extends OptionsPanelController
 
     @Override
     public void cancel() {
+        changed = false;
         // need not do anything special, if no changes have been persisted yet
     }
 
@@ -96,11 +99,13 @@ public final class TextlintOptionsPanelController extends OptionsPanelController
     private TextlintOptionsPanel getPanel() {
         if (panel == null) {
             panel = new TextlintOptionsPanel(this);
+            panel.addChangeListener(this);
         }
         return panel;
     }
 
-    void changed() {
+    @Override
+    public void stateChanged(ChangeEvent e) {
         if (!changed) {
             changed = true;
             pcs.firePropertyChange(OptionsPanelController.PROP_CHANGED, false, true);
