@@ -15,7 +15,13 @@
  */
 package com.junichi11.netbeans.modules.textlint.options;
 
+import com.junichi11.netbeans.modules.textlint.utils.TextlintUtils;
 import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
@@ -25,6 +31,7 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
     private static final String TEXTLINT_LAST_FOLDER_SUFFIX = ".textlint"; // NOI18N
     private static final String TEXTLINTRC_LAST_FOLDER_SUFFIX = ".textlintrc"; // NOI18N
     private static final long serialVersionUID = -7873059711550842158L;
+    private static final Logger LOGGER = Logger.getLogger(TextlintOptionsPanel.class.getName());
 
     private final TextlintOptionsPanelController controller;
 
@@ -173,16 +180,45 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
         textlintHtmlCheckBox.setSelected(options.isHtmlEnabled());
         textlintRefreshOnSaveCheckBox.setSelected(options.refreshOnSave());
         textlintShowAnnotationsCheckBox.setSelected(options.showAnnotation());
+        loadFromProperties(options);
     }
 
     void store() {
         TextlintOptions options = TextlintOptions.getInstance();
-        options.setTextlintPath(textlintPathTextField.getText().trim());
+        String textlintPath = textlintPathTextField.getText().trim();
+        options.setTextlintPath(textlintPath);
         options.setTextlintrcPath(textlintrcPathTextField.getText().trim());
         options.setTextlintOptions(textlintOptionsTextField.getText().trim());
         options.setHtmlEnabled(textlintHtmlCheckBox.isSelected());
         options.setRefreshOnSave(textlintRefreshOnSaveCheckBox.isSelected());
         options.setShowAnnotation(textlintShowAnnotationsCheckBox.isSelected());
+        if (!textlintPath.isEmpty()) {
+            options.setInitialized(true);
+        }
+    }
+
+    private void loadFromProperties(TextlintOptions options) {
+        if (options.initialized()) {
+            return;
+        }
+        try {
+            Properties properties = TextlintUtils.getProperties();
+            String textlintPath = properties.getProperty(TextlintOptions.TEXTLINT_PATH, options.getTextlintPath());
+            textlintPathTextField.setText(textlintPath);
+            if (!StringUtils.isEmpty(textlintPath)) {
+                textlintrcPathTextField.setText(properties.getProperty(TextlintOptions.TEXTLINTRC_PATH, options.getTextlintrcPath()));
+                textlintOptionsTextField.setText(properties.getProperty(TextlintOptions.TEXTLINT_OPTIONS, options.getTextlintOptions()));
+                String html = properties.getProperty(TextlintOptions.TEXTLINT_HTML);
+                textlintHtmlCheckBox.setSelected(html != null ? Boolean.valueOf(html) : options.isHtmlEnabled());
+                String refreshOnSave = properties.getProperty(TextlintOptions.TEXTLINT_REFRESH);
+                textlintRefreshOnSaveCheckBox.setSelected(refreshOnSave != null ? Boolean.valueOf(refreshOnSave) : options.refreshOnSave());
+                String showAnnotation = properties.getProperty(TextlintOptions.TEXTLINT_SHOW_ANNOTATION);
+                textlintShowAnnotationsCheckBox.setSelected(showAnnotation != null ? Boolean.valueOf(showAnnotation) : options.showAnnotation());
+                store();
+            }
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Please try to check your .nbp/textlint file. e.g. properties file format", ex); // NOI18N
+        }
     }
 
     boolean valid() {
