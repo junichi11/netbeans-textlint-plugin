@@ -1,13 +1,3 @@
-package com.junichi11.netbeans.modules.textlint.utils;
-
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
 /*
  * Copyright 2017 junichi11.
  *
@@ -23,6 +13,15 @@ import java.util.Properties;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.junichi11.netbeans.modules.textlint.utils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
+
 /**
  *
  * @author junichi11
