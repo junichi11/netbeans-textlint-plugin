@@ -3,12 +3,10 @@ package com.junichi11.netbeans.modules.textlint.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-import org.openide.util.Exceptions;
 
 /*
  * Copyright 2017 junichi11.
