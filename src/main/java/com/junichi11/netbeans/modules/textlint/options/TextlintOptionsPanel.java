@@ -80,8 +80,8 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
         textlintOptionsLabel = new javax.swing.JLabel();
         textlintOptionsTextField = new javax.swing.JTextField();
         textlintHtmlCheckBox = new javax.swing.JCheckBox();
-        textlintPathBrowsButton = new javax.swing.JButton();
-        textlintrcPathBrowsButton = new javax.swing.JButton();
+        textlintPathBrowseButton = new javax.swing.JButton();
+        textlintrcPathBrowseButton = new javax.swing.JButton();
         textlintRefreshOnSaveCheckBox = new javax.swing.JCheckBox();
         textlintShowAnnotationsCheckBox = new javax.swing.JCheckBox();
         errorLabel = new javax.swing.JLabel();
@@ -100,17 +100,17 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(textlintHtmlCheckBox, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintHtmlCheckBox.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(textlintPathBrowsButton, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintPathBrowsButton.text")); // NOI18N
-        textlintPathBrowsButton.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(textlintPathBrowseButton, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintPathBrowseButton.text")); // NOI18N
+        textlintPathBrowseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                textlintPathBrowsButtonActionPerformed(evt);
+                textlintPathBrowseButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(textlintrcPathBrowsButton, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintrcPathBrowsButton.text")); // NOI18N
-        textlintrcPathBrowsButton.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(textlintrcPathBrowseButton, org.openide.util.NbBundle.getMessage(TextlintOptionsPanel.class, "TextlintOptionsPanel.textlintrcPathBrowseButton.text")); // NOI18N
+        textlintrcPathBrowseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                textlintrcPathBrowsButtonActionPerformed(evt);
+                textlintrcPathBrowseButtonActionPerformed(evt);
             }
         });
 
@@ -133,12 +133,12 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(textlintrcPathTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
+                            .addComponent(textlintrcPathTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
                             .addComponent(textlintPathTextField, javax.swing.GroupLayout.Alignment.LEADING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(textlintrcPathBrowsButton)
-                            .addComponent(textlintPathBrowsButton, javax.swing.GroupLayout.Alignment.TRAILING)))
+                            .addComponent(textlintrcPathBrowseButton)
+                            .addComponent(textlintPathBrowseButton, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addComponent(textlintOptionsTextField)))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -154,12 +154,12 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(textlintPathLabel)
                     .addComponent(textlintPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(textlintPathBrowsButton))
+                    .addComponent(textlintPathBrowseButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(textlintrcPathLabel)
                     .addComponent(textlintrcPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(textlintrcPathBrowsButton))
+                    .addComponent(textlintrcPathBrowseButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(textlintOptionsLabel)
@@ -176,7 +176,7 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     @NbBundle.Messages("TextlintOptionsPanel.browse.textlint.title=Select textlint script")
-    private void textlintPathBrowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textlintPathBrowsButtonActionPerformed
+    private void textlintPathBrowseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textlintPathBrowseButtonActionPerformed
         File textlint = new FileChooserBuilder(TextlintOptionsPanel.class.getName() + TEXTLINT_LAST_FOLDER_SUFFIX)
                 .setTitle(Bundle.TextlintOptionsPanel_browse_textlint_title())
                 .setFilesOnly(true)
@@ -186,10 +186,10 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
             String textlintPath = textlint.getAbsolutePath();
             textlintPathTextField.setText(textlintPath);
         }
-    }//GEN-LAST:event_textlintPathBrowsButtonActionPerformed
+    }//GEN-LAST:event_textlintPathBrowseButtonActionPerformed
 
     @NbBundle.Messages("TextlintOptionsPanel.browse.textlintrc.title=Select .textlintrc")
-    private void textlintrcPathBrowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textlintrcPathBrowsButtonActionPerformed
+    private void textlintrcPathBrowseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textlintrcPathBrowseButtonActionPerformed
         File textlintrc = new FileChooserBuilder(TextlintOptionsPanel.class.getName() + TEXTLINTRC_LAST_FOLDER_SUFFIX)
                 .setTitle(Bundle.TextlintOptionsPanel_browse_textlintrc_title())
                 .setFilesOnly(true)
@@ -199,7 +199,7 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
             String textlintrcPath = textlintrc.getAbsolutePath();
             textlintrcPathTextField.setText(textlintrcPath);
         }
-    }//GEN-LAST:event_textlintrcPathBrowsButtonActionPerformed
+    }//GEN-LAST:event_textlintrcPathBrowseButtonActionPerformed
 
     void load() {
         TextlintOptions options = TextlintOptions.getInstance();
@@ -299,12 +299,12 @@ final class TextlintOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox textlintHtmlCheckBox;
     private javax.swing.JLabel textlintOptionsLabel;
     private javax.swing.JTextField textlintOptionsTextField;
-    private javax.swing.JButton textlintPathBrowsButton;
+    private javax.swing.JButton textlintPathBrowseButton;
     private javax.swing.JLabel textlintPathLabel;
     private javax.swing.JTextField textlintPathTextField;
     private javax.swing.JCheckBox textlintRefreshOnSaveCheckBox;
     private javax.swing.JCheckBox textlintShowAnnotationsCheckBox;
-    private javax.swing.JButton textlintrcPathBrowsButton;
+    private javax.swing.JButton textlintrcPathBrowseButton;
     private javax.swing.JLabel textlintrcPathLabel;
     private javax.swing.JTextField textlintrcPathTextField;
     // End of variables declaration//GEN-END:variables
