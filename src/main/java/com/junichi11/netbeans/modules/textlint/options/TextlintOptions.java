@@ -25,12 +25,13 @@ import org.openide.util.NbPreferences;
 public final class TextlintOptions {
 
     private static final String TEXTLINT = "textlint"; // NOI18N
-    private static final String TEXTLINT_PATH = "textlint.path"; // NOI18N
-    private static final String TEXTLINTRC_PATH = "textlintrc.path"; // NOI18N
-    private static final String TEXTLINT_OPTIONS = "textlint.options"; // NOI18N
-    private static final String TEXTLINT_HTML = "textlint.enable.html"; // NOI18N
-    private static final String TEXTLINT_REFRESH = "textlint.refresh.onsave"; // NOI18N
-    private static final String TEXTLINT_SHOW_ANNOTATION = "textlint.show.annotation"; // NOI18N
+    private static final String TEXTLINT_INITIALIZED = "textlint.initialized"; // NOI18N
+    static final String TEXTLINT_PATH = "textlint.path"; // NOI18N
+    static final String TEXTLINTRC_PATH = "textlintrc.path"; // NOI18N
+    static final String TEXTLINT_OPTIONS = "textlint.options"; // NOI18N
+    static final String TEXTLINT_HTML = "textlint.enable.html"; // NOI18N
+    static final String TEXTLINT_REFRESH = "textlint.refresh.onsave"; // NOI18N
+    static final String TEXTLINT_SHOW_ANNOTATION = "textlint.show.annotation"; // NOI18N
     private static final TextlintOptions INSTANCE = new TextlintOptions();
 
     private TextlintOptions() {
@@ -86,6 +87,14 @@ public final class TextlintOptions {
 
     public void setShowAnnotation(boolean show) {
         getPreferences().putBoolean(TEXTLINT_SHOW_ANNOTATION, show);
+    }
+
+    public boolean initialized() {
+        return getPreferences().getBoolean(TEXTLINT_INITIALIZED, false);
+    }
+
+    public void setInitialized(boolean initialized) {
+        getPreferences().putBoolean(TEXTLINT_INITIALIZED, initialized);
     }
 
     private Preferences getPreferences() {

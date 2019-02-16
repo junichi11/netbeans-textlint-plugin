@@ -26,13 +26,13 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="textlintrcPathTextField" alignment="0" pref="281" max="32767" attributes="0"/>
+                          <Component id="textlintrcPathTextField" alignment="0" pref="272" max="32767" attributes="0"/>
                           <Component id="textlintPathTextField" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="textlintrcPathBrowsButton" min="-2" max="-2" attributes="0"/>
-                          <Component id="textlintPathBrowsButton" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="textlintrcPathBrowseButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="textlintPathBrowseButton" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Component id="textlintOptionsTextField" max="32767" attributes="0"/>
@@ -43,6 +43,7 @@
                   <Component id="textlintHtmlCheckBox" min="-2" max="-2" attributes="0"/>
                   <Component id="textlintRefreshOnSaveCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="textlintShowAnnotationsCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="errorLabel" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -54,13 +55,13 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="textlintPathLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="textlintPathTextField" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="textlintPathBrowsButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="textlintPathBrowseButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="textlintrcPathLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="textlintrcPathTextField" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="textlintrcPathBrowsButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="textlintrcPathBrowseButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -73,6 +74,8 @@
               <Component id="textlintRefreshOnSaveCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="textlintShowAnnotationsCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="errorLabel" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -127,24 +130,24 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="textlintPathBrowsButton">
+    <Component class="javax.swing.JButton" name="textlintPathBrowseButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/junichi11/netbeans/modules/textlint/options/Bundle.properties" key="TextlintOptionsPanel.textlintPathBrowsButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="com/junichi11/netbeans/modules/textlint/options/Bundle.properties" key="TextlintOptionsPanel.textlintPathBrowseButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textlintPathBrowsButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textlintPathBrowseButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="textlintrcPathBrowsButton">
+    <Component class="javax.swing.JButton" name="textlintrcPathBrowseButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/junichi11/netbeans/modules/textlint/options/Bundle.properties" key="TextlintOptionsPanel.textlintrcPathBrowsButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="com/junichi11/netbeans/modules/textlint/options/Bundle.properties" key="TextlintOptionsPanel.textlintrcPathBrowseButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textlintrcPathBrowsButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textlintrcPathBrowseButtonActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="textlintRefreshOnSaveCheckBox">
@@ -158,6 +161,13 @@
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="com/junichi11/netbeans/modules/textlint/options/Bundle.properties" key="TextlintOptionsPanel.textlintShowAnnotationsCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="errorLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="com/junichi11/netbeans/modules/textlint/options/Bundle.properties" key="TextlintOptionsPanel.errorLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
