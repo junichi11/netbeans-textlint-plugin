@@ -1,16 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.junichi11</groupId>
-    <artifactId>netbeans-textlint-plugin</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.junichi11.netbeans.modules</groupId>
+    <artifactId>netbeans-textlint</artifactId>
+    <version>1.1.0</version>
     <packaging>nbm</packaging>
+    <name>textlint Support</name>
+    <url>https://github.com/junichi11/netbeans-textlint-plugin</url>
+    <developers>
+        <developer>
+            <id>junichi11</id>
+            <name>Junichi Yamamoto</name>
+            <url>https://github.com/junichi11</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/junichi11/netbeans-textlint-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/junichi11/netbeans-textlint-plugin.git</developerConnection>
+        <url>https://github.com/junichi11/netbeans-textlint-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.13</version>
+                <version>4.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <codeNameBase>com.junichi11.netbeans.modules.textlint</codeNameBase>
@@ -24,7 +56,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -33,15 +65,31 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.2.0</version>
                 <configuration>
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.15</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -54,12 +102,17 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>unknown-jars-temp-repo</id>
-            <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
-            <url>file:${project.basedir}/lib</url>
-        </repository>
     </repositories>
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -200,9 +253,10 @@
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.release.version>RELEASE82</netbeans.release.version>
+        <netbeans.release.version>RELEASE110</netbeans.release.version>
+        <!-- deploy: mvn -Dgpg.skip=false deploy -->
+        <gpg.skip>true</gpg.skip>
     </properties>
-    <name>textlint Support</name>
     <description>This plugin provides support for textlint.
 
 &lt;h3&gt;What&amp;rsquo;s the textlint?&lt;/h3&gt;
