@@ -107,6 +107,10 @@ You can also set the shortcut key(Tools > Options > Keymap).
 - ![normal errors](screenshots/textlint_icon_16.png): Normal errors
 - ![fixable errors](screenshots/textlint_fixable_icon_16.png): Fixable errors
 
+### Color & Effect
+
+See Tools > Options > Fonts & Colors > Annotations > com-junichi11-netbeans-modules-textlint-*
+
 ### NOTE
 
 - The plugin scans only current file.
